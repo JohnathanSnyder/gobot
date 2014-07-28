@@ -65,7 +65,9 @@ func (bot *GoBot) Crawl(seed string) {
 	for {
 		resp, err := bot.Get(currUrl)
 		for err != nil {
-			go bot.OnError(resp.Request)
+			if resp != nil {
+				go bot.OnError(resp.Request)
+			}
 			if len(queue) > 0 {
 				currUrl = queue[0]
 				queue = queue[1:]

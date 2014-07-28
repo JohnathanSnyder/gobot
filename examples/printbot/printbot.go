@@ -3,6 +3,7 @@ package main
 import (
        "fmt"
        "os"
+       "log"
        "net/url"
        "net/http"
        "github.com/JohnathanSnyder/gobot"
@@ -22,6 +23,11 @@ func main() {
         fmt.Printf("Please enter url.\n")
         os.Exit(1)
     }
+    file, err := os.Create("bot.log")
+    if err != nil {
+      log.Fatal(err)
+    }
+    log.SetOutput(file)
     seed := os.Args[1]
     bot := gobot.NewGoBot()
     setCookies(bot)
