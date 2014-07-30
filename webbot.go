@@ -19,6 +19,8 @@ var (
 
 type VisitAction func(*http.Response)
 
+type FoundAction func(string)
+
 type ErrorAction func(*http.Request)
 
 type VisitDecision func(string) bool
@@ -26,6 +28,7 @@ type VisitDecision func(string) bool
 type GoBot struct {
 	http.Client
 	OnVisit     VisitAction
+    OnFind      FoundAction
 	OnError     ErrorAction
 	ShouldVisit VisitDecision
 	visited     map[string]bool
@@ -34,6 +37,7 @@ type GoBot struct {
 func NewGoBot() *GoBot {
 	bot := new(GoBot)
 	bot.OnVisit = defaultVisitAction
+    bot.OnFind = defaultFoundAction
 	bot.OnError = defaultErrorAction
 	bot.ShouldVisit = defaultVisitDecision
 	bot.Jar = NewBotCookieJar()
@@ -83,6 +87,7 @@ func (bot *GoBot) Crawl(seed string) {
 		for _, url := range urls {
 			_, present := bot.visited[url]
 			if !present {
+                bot.OnFind(url)
 				queue = append(queue, url)
 				bot.visited[url] = true
 			}
@@ -124,8 +129,12 @@ func ResponseBodyToString(resp *http.Response) string {
 }
 
 func defaultVisitAction(resp *http.Response) {
-	request := resp.Request
-	log.Printf("%s\n", request.URL.String())
+	//request := resp.Request
+	//log.Printf("%s\n", request.URL.String())
+}
+
+func defaultFoundAction(u string) {
+    log.Printf("%s\n", u)
 }
 
 func defaultErrorAction(resp *http.Request) {
