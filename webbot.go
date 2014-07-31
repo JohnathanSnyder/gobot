@@ -15,11 +15,14 @@ var (
 	tagRe  = regexp.MustCompilePOSIX("<a[^>]*>")
 	attrRe = regexp.MustCompilePOSIX("href=\"[^\"]*\"")
 	urlRe  = regexp.MustCompilePOSIX("http://[^\"]*")
+	imgRe = regexp.MustCompilePOSIX(".(gif|jpg|jpeg|png)$")
 )
 
 type VisitAction func(*http.Response)
 
 type FoundAction func(string)
+
+type ImageAction func(string)
 
 type ErrorAction func(*http.Request)
 
@@ -29,6 +32,7 @@ type GoBot struct {
 	http.Client
 	OnVisit     VisitAction
     OnFind      FoundAction
+    OnImage     ImageAction
 	OnError     ErrorAction
 	ShouldVisit VisitDecision
 	visited     map[string]bool
@@ -40,6 +44,7 @@ func NewGoBot() *GoBot {
     bot.OnFind = defaultFoundAction
 	bot.OnError = defaultErrorAction
 	bot.ShouldVisit = defaultVisitDecision
+	bot.OnImage = defaultImageAction
 	bot.Jar = NewBotCookieJar()
 	bot.visited = make(map[string]bool)
 	return bot
@@ -87,8 +92,12 @@ func (bot *GoBot) Crawl(seed string) {
 		for _, url := range urls {
 			_, present := bot.visited[url]
 			if !present {
-                bot.OnFind(url)
-				queue = append(queue, url)
+                go bot.OnFind(url)
+                if IsImage(url) {
+                	go bot.OnImage(url)
+                } else {
+					queue = append(queue, url)
+				}
 				bot.visited[url] = true
 			}
 		}
@@ -128,13 +137,21 @@ func ResponseBodyToString(resp *http.Response) string {
 	return string(body)
 }
 
+func IsImage(url string) bool {
+	return imgRe.MatchString(url)
+}
+
 func defaultVisitAction(resp *http.Response) {
 	//request := resp.Request
 	//log.Printf("%s\n", request.URL.String())
 }
 
 func defaultFoundAction(u string) {
-    log.Printf("%s\n", u)
+    //log.Printf("%s\n", u)
+}
+
+func defaultImageAction(u string) {
+	log.Printf("%s\n", u)
 }
 
 func defaultErrorAction(resp *http.Request) {
