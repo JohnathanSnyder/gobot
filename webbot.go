@@ -142,8 +142,8 @@ func IsImage(url string) bool {
 }
 
 func defaultVisitAction(resp *http.Response) {
-	//request := resp.Request
-	//log.Printf("%s\n", request.URL.String())
+	request := resp.Request
+	log.Printf("%s\n", request.URL.String())
 }
 
 func defaultFoundAction(u string) {
@@ -151,7 +151,7 @@ func defaultFoundAction(u string) {
 }
 
 func defaultImageAction(u string) {
-	log.Printf("%s\n", u)
+	//log.Printf("%s\n", u)
 }
 
 func defaultErrorAction(resp *http.Request) {
