@@ -15,7 +15,7 @@ var (
 	tagRe  = regexp.MustCompilePOSIX("<a[^>]*>")
 	attrRe = regexp.MustCompilePOSIX("href=\"[^\"]*\"")
 	urlRe  = regexp.MustCompilePOSIX("http://[^\"]*")
-	imgRe = regexp.MustCompilePOSIX(".(gif|jpg|jpeg|png)$")
+	imgRe  = regexp.MustCompilePOSIX(".(gif|jpg|jpeg|png)$")
 )
 
 type VisitAction func(*http.Response)
@@ -31,8 +31,8 @@ type VisitDecision func(string) bool
 type GoBot struct {
 	http.Client
 	OnVisit     VisitAction
-    OnFind      FoundAction
-    OnImage     ImageAction
+	OnFind      FoundAction
+	OnImage     ImageAction
 	OnError     ErrorAction
 	ShouldVisit VisitDecision
 	visited     map[string]bool
@@ -41,7 +41,7 @@ type GoBot struct {
 func NewGoBot() *GoBot {
 	bot := new(GoBot)
 	bot.OnVisit = defaultVisitAction
-    bot.OnFind = defaultFoundAction
+	bot.OnFind = defaultFoundAction
 	bot.OnError = defaultErrorAction
 	bot.ShouldVisit = defaultVisitDecision
 	bot.OnImage = defaultImageAction
@@ -92,10 +92,10 @@ func (bot *GoBot) Crawl(seed string) {
 		for _, url := range urls {
 			_, present := bot.visited[url]
 			if !present {
-                go bot.OnFind(url)
-                if IsImage(url) {
-                	go bot.OnImage(url)
-                } else {
+				go bot.OnFind(url)
+				if IsImage(url) {
+					go bot.OnImage(url)
+				} else {
 					queue = append(queue, url)
 				}
 				bot.visited[url] = true
@@ -147,7 +147,7 @@ func defaultVisitAction(resp *http.Response) {
 }
 
 func defaultFoundAction(u string) {
-    //log.Printf("%s\n", u)
+	//log.Printf("%s\n", u)
 }
 
 func defaultImageAction(u string) {
